@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animaciones personalizadas */
+        .fade-in {
+            animation: fadeIn 1s ease-in forwards;
+        }
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); visibility: hidden; }
+        }
+
+        /* Animación del sobre latiendo */
+        .pulse-envelope {
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Animación de destellos para el ramo */
+        .sparkle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+            animation: twinkle 2s infinite alternate;
+            opacity: 0;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+        
+        /* Animación de respiración/flotación para el ramo */
+        .animate-bouquet {
+            animation: floatAndBreathe 4s ease-in-out infinite;
+        }
+        
+        @keyframes floatAndBreathe {
+            0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0px rgba(255,100,150,0)) brightness(1); }
+            50% { transform: translateY(-12px) scale(1.04); filter: drop-shadow(0 15px 25px rgba(255,100,150,0.6)) brightness(1.08); }
+            100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0px rgba(255,100,150,0)) brightness(1); }
+        }
+
+        /* Ocultar scrollbar pero permitir scroll en la carta si es larga */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-rose-50 h-screen w-full flex items-center justify-center overflow-hidden font-sans text-gray-800">
+
+    <!-- ESCENA 1: EL SOBRE -->
+    <div id="scene-envelope" class="absolute inset-0 flex flex-col items-center justify-center z-30 bg-rose-50 transition-opacity duration-1000">
+        <div class="text-center mb-8 fade-in" style="animation-delay: 0.2s;">
+            <h1 class="text-3xl md:text-4xl font-serif text-rose-800 mb-2">Tienes un regalo especial</h1>
+            <p class="text-rose-600/80">Toca el sobre para abrirlo</p>
+        </div>
+        
+        <div class="relative w-64 h-48 sm:w-80 sm:h-60 pulse-envelope group fade-in" style="animation-delay: 0.5s;" onclick="openEnvelope()">
+            <!-- Cuerpo del sobre (parte trasera) -->
+            <div class="absolute inset-0 bg-rose-200 rounded-md shadow-lg border border-rose-300"></div>
+            
+            <!-- Solapa inferior -->
+            <div class="absolute bottom-0 left-0 w-full h-full bg-rose-100 rounded-md clip-bottom shadow-inner" style="clip-path: polygon(0 100%, 50% 40%, 100% 100%);"></div>
+            
+            <!-- Solapas laterales -->
+            <div class="absolute inset-0 bg-rose-50 rounded-md" style="clip-path: polygon(0 0, 50% 50%, 0 100%);"></div>
+            <div class="absolute inset-0 bg-rose-50 rounded-md" style="clip-path: polygon(100% 0, 50% 50%, 100% 100%);"></div>
+            
+            <!-- Solapa superior (la que se abre) -->
+            <div id="envelope-flap" class="absolute top-0 left-0 w-full h-full bg-rose-300 rounded-t-md origin-top transition-transform duration-700 ease-in-out z-10" style="clip-path: polygon(0 0, 100% 0, 50% 60%);"></div>
+            
+            <!-- Sello -->
+            <div class="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-md z-20 group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- ESCENA 2: EL RAMO DE FLORES -->
+    <div id="scene-bouquet" class="absolute inset-0 flex flex-col items-center justify-center z-20 bg-amber-50/50 opacity-0 hidden transition-opacity duration-1000 backdrop-blur-sm">
+        
+        <div id="bouquet-container" class="relative w-[90%] max-w-md aspect-square rounded-2xl overflow-visible transform scale-90 transition-transform duration-1000 cursor-pointer" onclick="showLetter()">
+            <!-- Imagen exacta que proporcionaste con animación CSS aplicada -->
+            <img src="flores.jpeg" alt="Ramo de rosas y lirios animado" class="w-full h-full object-cover rounded-2xl shadow-2xl animate-bouquet relative z-10" id="bouquet-img" onerror="this.src='http://googleusercontent.com/image_generation_content/2'">
+            
+            <!-- Contenedor para los destellos generados por JS -->
+            <div id="sparkles-container" class="absolute inset-[-20px] pointer-events-none z-20"></div>
+            
+            <!-- Superposición de instrucciones -->
+            <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-2xl z-30">
+                <span class="bg-white/90 text-rose-800 px-6 py-3 rounded-full font-semibold shadow-lg transform hover:scale-105 transition-transform">
+                    Leer la carta ✨
+                </span>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center" id="bouquet-text">
+            <p class="text-xl md:text-2xl font-serif text-rose-900 italic">Un detalle para alegrar tu día</p>
+            <p class="text-sm text-rose-600/60 mt-2">(Toca las flores para continuar)</p>
+        </div>
+    </div>
+
+    <!-- ESCENA 3: LA CARTA -->
+    <div id="scene-letter" class="absolute inset-0 flex items-center justify-center z-10 bg-rose-50 opacity-0 hidden transition-opacity duration-1000">
+        
+        <div class="relative w-[90%] max-w-lg h-[80vh] max-h-[600px] bg-white rounded-lg shadow-xl p-8 md:p-12 overflow-y-auto no-scrollbar" style="background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');">
+            
+            <!-- Marca de agua floral de fondo -->
+            <div class="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-64 h-64 text-rose-800">
+                    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                </svg>
+            </div>
+
+            <!-- Contenido de la carta -->
+            <div class="relative z-10 font-serif leading-relaxed text-gray-700">
+                <p class="text-right text-sm text-gray-500 mb-6 font-sans" id="current-date"></p>
+                
+                <h2 class="text-3xl text-rose-800 mb-6 font-bold" contenteditable="true">¡Hola EMI!</h2>
+                
+                <div class="space-y-4 text-lg">
+                    <p contenteditable="true">Quería enviarte este pequeño detalle virtual para recordarte lo especial que eres.</p>
+                    
+                    <p contenteditable="true">Aunque estas flores sean digitales, el cariño con el que te las envío es muy real. Espero que al verlas se dibuje una sonrisa en tu rostro y que tu día se llene de un poco más de luz.</p>
+                    
+                    <p contenteditable="true">tal vez el tiempo me de la razon y puedas saber el lugar que ocupas en mi coraozn .</p>
+                    
+                    <p contenteditable="true">espero te agraden</p>
+                </div>
+                
+                <div class="mt-12 text-right">
+                    <p class="text-xl text-rose-800 italic" contenteditable="true">Con cariño,</p>
+                    <p class="text-2xl font-bold text-rose-900 mt-2 font-signature" contenteditable="true">Edgar</p>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-6 border-t border-rose-100 text-center">
+                <p class="text-xs text-gray-400 font-sans"></p>
+                <button onclick="resetApp()" class="mt-4 px-4 py-2 bg-rose-100 text-rose-700 rounded-full text-sm hover:bg-rose-200 transition-colors">
+                    Ver de nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para la lógica de la tarjeta -->
+    <script>
+        // Elementos DOM
+        const sceneEnvelope = document.getElementById('scene-envelope');
+        const envelopeFlap = document.getElementById('envelope-flap');
+        const sceneBouquet = document.getElementById('scene-bouquet');
+        const bouquetContainer = document.getElementById('bouquet-container');
+        const sparklesContainer = document.getElementById('sparkles-container');
+        const sceneLetter = document.getElementById('scene-letter');
+        const dateElement = document.getElementById('current-date');
+
+        // Establecer fecha actual
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        dateElement.textContent = new Date().toLocaleDateString('es-ES', options);
+
+        // Crear destellos para el ramo
+        function createSparkles() {
+            sparklesContainer.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                
+                // Posición aleatoria
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.top = `${Math.random() * 100}%`;
+                
+                // Retraso y duración aleatoria
+                sparkle.style.animationDelay = `${Math.random() * 2}s`;
+                sparkle.style.animationDuration = `${1 + Math.random() * 2}s`;
+                
+                sparklesContainer.appendChild(sparkle);
+            }
+        }
+
+        // Función 1: Abrir el sobre
+        function openEnvelope() {
+            // Detener el latido
+            document.querySelector('.pulse-envelope').classList.remove('pulse-envelope');
+            
+            // Animar la solapa
+            envelopeFlap.style.transform = 'rotateX(180deg)';
+            
+            // Transición a la siguiente escena
+            setTimeout(() => {
+                sceneEnvelope.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    sceneEnvelope.style.display = 'none';
+                    sceneBouquet.classList.remove('hidden');
+                    
+                    // Pequeño retraso para que el display:block tome efecto antes de la opacidad
+                    setTimeout(() => {
+                        sceneBouquet.style.opacity = '1';
+                        bouquetContainer.style.transform = 'scale(1)';
+                        createSparkles();
+                    }, 50);
+                    
+                }, 500); // Esperar a que termine el fade-out
+            }, 800); // Esperar a que la solapa se abra
+        }
+
+        // Función 2: Mostrar la carta
+        function showLetter() {
+            sceneBouquet.style.opacity = '0';
+            
+            setTimeout(() => {
+                sceneBouquet.classList.add('hidden');
+                sceneLetter.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    sceneLetter.style.opacity = '1';
+                }, 50);
+            }, 1000);
+        }
+
+        // Función 3: Reiniciar
+        function resetApp() {
+            sceneLetter.style.opacity = '0';
+            
+            setTimeout(() => {
+                sceneLetter.classList.add('hidden');
+                
+                // Restaurar estado inicial
+                envelopeFlap.style.transform = 'rotateX(0deg)';
+                document.querySelector('.group').classList.add('pulse-envelope');
+                sceneEnvelope.classList.remove('fade-out');
+                sceneEnvelope.style.display = 'flex';
+                bouquetContainer.style.transform = 'scale(0.9)';
+                
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
